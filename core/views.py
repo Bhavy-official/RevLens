@@ -1,179 +1,181 @@
-# from django.shortcuts import render, redirect, get_object_or_404
-# from django.contrib import messages
-# from django.db.models import Count
-# from .models import Product, Review, CriticalIssue
-# from .forms import ProductAddForm
-# from .services import (
-#     ingest_reviews_for_pid,
-#     run_sentiment_for_product,
-#     run_critical_issues_for_product,
-#     product_stats,
-# )
+# core/views.py
 
-# def products_home(request):
-#     # Sidebar list: products with review counts
-#     products = Product.objects.annotate(n_reviews=Count("review")).order_by("-id")
+import json
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Product, Review
+from .scraper.flipkart import scrape_flipkart_reviews
+from .utils import analyze_sentiments_for_reviews
 
-#     # If there are products, show latest one on landing
-#     current = products.first() if products else None
-#     issues = CriticalIssue.objects.filter(product=current).order_by("-frequency")[:5] if current else []
-#     reviews = Review.objects.filter(product=current).order_by("-id")[:10] if current else []
-
-#     context = {
-#         "products": products,
-#         "current": current,
-#         "issues": issues,
-#         "reviews": reviews,
-#         "stats": product_stats(current) if current else {"total":0,"avg_rating":0,"positive":0,"negative":0},
-#         "form": ProductAddForm(),
-#     }
-#     return render(request, "dashboard.html", context)
-
-# def add_product(request):
-#     if request.method == "POST":
-#         form = ProductAddForm(request.POST)
-#         if form.is_valid():
-#             name = form.cleaned_data["name"]
-#             pid  = form.cleaned_data["pid"]
-#             product, created = Product.objects.get_or_create(name=name)
-
-#             try:
-#                 saved = ingest_reviews_for_pid(product, pid, max_pages=4)
-#                 analyzed = run_sentiment_for_product(product)
-#                 issues = run_critical_issues_for_product(product)
-#                 messages.success(request, f"Added {name}: {saved} reviews, analyzed {analyzed}, found {issues} critical issues.")
-#             except Exception as e:
-#                 messages.error(request, f"Failed: {e}")
-#             return redirect("product_detail", product_id=product.id)
-#         else:
-#             messages.error(request, "Invalid form.")
-#     return redirect("products_home")
-
-# def product_detail(request, product_id: int):
-#     product = get_object_or_404(Product, id=product_id)
-#     products = Product.objects.annotate(n_reviews=Count("review")).order_by("-id")
-
-#     issues = CriticalIssue.objects.filter(product=product).order_by("-frequency")[:5]
-#     reviews = Review.objects.filter(product=product).order_by("-id")[:10]
-
-#     context = {
-#         "products": products,
-#         "current": product,
-#         "issues": issues,
-#         "reviews": reviews,
-#         "stats": product_stats(product),
-#         "form": ProductAddForm(),
-#     }
-#     return render(request, "dashboard.html", context)
-
-# def rescrape_product(request, product_id: int):
-#     product = get_object_or_404(Product, id=product_id)
-#     if request.method == "POST":
-#         pid = request.POST.get("pid")
-#         if not pid:
-#             messages.error(request, "Provide PID to rescrape.")
-#             return redirect("product_detail", product_id=product.id)
-#         try:
-#             saved = ingest_reviews_for_pid(product, pid, max_pages=4)
-#             analyzed = run_sentiment_for_product(product)
-#             issues = run_critical_issues_for_product(product)
-#             messages.success(request, f"Re-scraped: {saved} new reviews, analyzed {analyzed}, issues {issues}.")
-#         except Exception as e:
-#             messages.error(request, f"Failed: {e}")
-#     return redirect("product_detail", product_id=product.id)
-
-
-# from django.shortcuts import redirect, get_object_or_404
-# from django.contrib import messages
-# from .models import Product
-# from .services import run_sentiment_for_product, run_critical_issues_for_product
-
-# def run_sentiment_view(request, product_id):
-#     product = get_object_or_404(Product, id=product_id)
-#     if request.method == "POST":
-#         try:
-#             analyzed = run_sentiment_for_product(product)
-#             messages.success(request, f"Sentiment analysis done: {analyzed} reviews analyzed.")
-#         except Exception as e:
-#             messages.error(request, f"Failed: {e}")
-#     return redirect("product_detail", product_id=product.id)
-
-# def run_critical_issues_view(request, product_id):
-#     product = get_object_or_404(Product, id=product_id)
-#     if request.method == "POST":
-#         try:
-#             issues = run_critical_issues_for_product(product)
-#             messages.success(request, f"Critical issues detected: {issues} issues found.")
-#         except Exception as e:
-#             messages.error(request, f"Failed: {e}")
-#     return redirect("product_detail", product_id=product.id)
-
-
-
-
-
-from django.shortcuts import render
 
 def dashboard(request):
+    
     return render(request, "dashboard.html")
 
 
-# core/views.py
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-from core.models import Product
+def product_list(request):
+   
+    products = Product.objects.all().values("pid", "name")
+    return JsonResponse({"products": list(products)})
 
-from django.http import JsonResponse
-from core.models import Product
-
-# core/views.py
-from django.http import JsonResponse
-from core.models import Product
-from core.scraper.flipkart import scrape_flipkart_reviews
-from core.models import Review
-from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
-def add_product(request):
-    pid = request.GET.get("pid")
-    name = request.GET.get("name")
+def add_and_scrape_product(request):
+   
+    if request.method != "POST":
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        pid = data.get("pid")
+        name = data.get("name")
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
 
     if not pid or not name:
         return JsonResponse({"error": "pid and name are required"}, status=400)
 
     product, created = Product.objects.get_or_create(pid=pid, defaults={"name": name})
-    if not created:
-        return JsonResponse({"message": "Product already exists"}, status=200)
+    message = "Product added successfully" if created else "Product already existed"
 
-    return JsonResponse({
-        "message": "Product added successfully",
-        "product": {"pid": product.pid, "name": product.name}
-    }, status=201)
-
-
-@csrf_exempt
-def scrape_product(request):
-    pid = request.GET.get("pid")
-    name = request.GET.get("name")
-    if not pid or not name:
-        return JsonResponse({"error": "pid and name required"}, status=400)
-
-    # Ensure product exists
-    product, _ = Product.objects.get_or_create(pid=pid, defaults={"name": name})
-
-    reviews = scrape_flipkart_reviews(pid, max_pages=2)  # smaller for testing
-    for r in reviews:
-        Review.objects.create(
+    # Scrape 
+    reviews_data = scrape_flipkart_reviews(pid, max_pages=10)
+    saved_reviews = []
+    for r in reviews_data:
+        rev = Review.objects.create(
             product=product,
-            reviewer=r['reviewer_name'],
-            rating=r['rating'],
+            reviewer=r.get('reviewer_name') or "Anonymous",
+            rating=r.get('rating') or 0,
             verified=True,
-            text=r['review_text'],
-            title=r['title'],
-            location=r['location'],
-            review_date=r['date'],
+            text=r.get('review_text') or "",
+            title=r.get('title') or "",
+            location=r.get('location') or "",
+            review_date=r.get('date'),
             category="product",
         )
+        saved_reviews.append(rev)
 
-    return JsonResponse({"message": f"{len(reviews)} reviews scraped for {product.name}"})
+  
+    analyzed_count = analyze_sentiments_for_reviews(saved_reviews)
+
+    return JsonResponse({
+        "message": message,
+        "product": {"pid": product.pid, "name": product.name},
+        "reviews_scraped": len(reviews_data),
+        "sentiment_analyzed": analyzed_count
+    })
+
+
+def dashboard_data(request, pid):
+    try:
+        product = Product.objects.get(pid=pid)
+    except Product.DoesNotExist:
+        return JsonResponse({"error": "Product not found"}, status=404)
+
+    reviews = Review.objects.filter(product=product).order_by("-id")
+    total_reviews = reviews.count()
+
+    if total_reviews:
+        total_rating = 0
+        count = 0
+        for r in reviews:
+            try:
+                rating = float(r.rating)
+                total_rating += rating
+                count += 1
+            except (TypeError, ValueError):
+                continue
+        avg_rating = round(total_rating / count, 2) if count else 2.4
+    else:
+        avg_rating = 2.4
+
+    sentiment_counts = {}
+    recent_reviews = []
+
+    for r in reviews:
+        if hasattr(r.review_date, "strftime"):
+            date_str = r.review_date.strftime("%b %d, %Y")
+        else:
+            date_str = str(r.review_date)
+
+        recent_reviews.append({
+            "reviewer": r.reviewer,
+            "rating": r.rating,
+            "text": r.text,
+            "sentiment": r.sentiment or "neutral",
+            "review_date": date_str
+        })
+
+        s = r.sentiment or "unknown"
+        sentiment_counts[s] = sentiment_counts.get(s, 0) + 1
+
+    chart_data = [{"sentiment": k, "count": v} for k, v in sentiment_counts.items()]
+
+    return JsonResponse({
+        "total_reviews": total_reviews,
+        "avg_rating": avg_rating,
+        "sentiment_counts": chart_data,
+        "recent_reviews": recent_reviews  
+    })
+
+
+from django.http import JsonResponse
+from .models import Product, Review
+
+def critical_issues(request, pid):
+    try:
+        product = Product.objects.get(pid=pid)
+    except Product.DoesNotExist:
+        return JsonResponse({"error": "Product not found"}, status=404)
+
+    reviews = Review.objects.filter(product=product)
+    total_reviews = reviews.count() or 1  # avoid division by zero
+
+    issues = []
+
+    # 1️⃣ Missing rating (avg fallback)
+    missing_rating_count = reviews.filter(rating__isnull=True).count()
+    if missing_rating_count > 0:
+        issues.append({
+            "issue": "Missing rating / avg fallback used",
+            "severity": "High",
+            "count": missing_rating_count,
+            "percent": round(missing_rating_count / total_reviews * 100, 1)
+        })
+
+    # 2️⃣ Reviewer empty
+    reviewer_empty_count = reviews.filter(reviewer__isnull=True).count() + \
+                           reviews.filter(reviewer__exact="").count()
+    if reviewer_empty_count > 0:
+        issues.append({
+            "issue": "Reviewer name missing",
+            "severity": "High",
+            "count": reviewer_empty_count,
+            "percent": round(reviewer_empty_count / total_reviews * 100, 1)
+        })
+
+    # 3️⃣ Unknown sentiment
+    unknown_sentiment_count = reviews.filter(sentiment__in=[None, "", "unknown"]).count()
+    if unknown_sentiment_count > 0:
+        issues.append({
+            "issue": "Unknown sentiment",
+            "severity": "Medium",
+            "count": unknown_sentiment_count,
+            "percent": round(unknown_sentiment_count / total_reviews * 100, 1)
+        })
+
+    # 4️⃣ Very short review texts
+    short_text_count = reviews.filter(text__length__lt=20).count()
+    if short_text_count > 0:
+        issues.append({
+            "issue": "Short / truncated review text",
+            "severity": "Medium",
+            "count": short_text_count,
+            "percent": round(short_text_count / total_reviews * 100, 1)
+        })
+
+    return JsonResponse({
+        "total_reviews": total_reviews,
+        "critical_issues": issues
+    })

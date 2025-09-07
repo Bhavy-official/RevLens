@@ -2,7 +2,11 @@ from django.db import models
 
 class Product(models.Model):
     name = models.CharField(max_length=200)
+    # Temporarily allow null and blank
+    pid = models.CharField(max_length=50,  null=True, blank=True)
+
     url = models.URLField()
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

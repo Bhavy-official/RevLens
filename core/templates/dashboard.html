@@ -2,42 +2,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RevLens Dashboard</title>
-    <link rel="stylesheet" href="{% static 'css/dashboard.css'%}" />
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RevLens Dashboard</title>
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 </head>
 <body>
 <div id="revlens">
     <div class="container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h1>RevLens</h1>
-            </div>
-            <div class="sidebar-section">
-                <h2>Products</h2>
-                <button class="product-btn active">SmartPhone Pro <span>32</span></button>
-                <button class="product-btn">AudioBuds X <span>16</span></button>
-                <button class="product-btn">SmartWatch <span>8</span></button>
+        <!-- Sidebar -->
+<aside class="sidebar">
+    <div class="sidebar-header"><h1>RevLens</h1></div>
 
-                <!-- Add Product Trigger -->
-                <button class="add-product-btn" id="openProductModal">
-                    ➕ Add Product
-                </button>
-            </div>
+    <div class="sidebar-section" id="productList">
+        <h2>Products</h2>
+        <!-- JS will insert products here -->
+        <button class="add-product-btn" id="openProductModal">➕ Add Product</button>
+    </div>
 
-            <div class="sidebar-section">
-                <h2>Date Range</h2>
-                <button class="date-range-btn">Last 30 days</button>
-            </div>
-            <div class="sidebar-footer">
-                <button>Settings</button>
-                <button>Help Center</button>
-            </div>
-        </aside>
+    <div class="sidebar-section">
+        <h2>Date Range</h2>
+        <button class="date-range-btn">Last 30 days</button>
+    </div>
+
+    <div class="sidebar-footer">
+        <button>Settings</button>
+        <button>Help Center</button>
+    </div>
+</aside>
+
 
         <!-- Main content -->
         <div class="main">
@@ -46,7 +42,7 @@
                     <input type="text" placeholder="Search reviews, issues...">
                 </div>
                 <div class="header-right">
-                    <p>Welcome back, <strong>Alex</strong></p>
+                    <p>Welcome back, <strong>Bhavy</strong></p>
                     <button>Connect</button>
                     <button id="theme-toggle">Toggle Theme</button>
                 </div>
@@ -55,9 +51,10 @@
             <main>
                 <div class="dashboard-header">
                     <h1>Dashboard</h1>
-                    <p>Analytics for SmartPhone Pro</p>
+                    <p>Analytics for Product</p>
                 </div>
 
+                <!-- Stats Cards -->
                 <div class="stats-cards">
                     <div class="card">
                         <h3>Sentiment Change</h3>
@@ -67,7 +64,7 @@
                     <div class="card">
                         <h3>Average Rating</h3>
                         <p class="big-text">4.2 / 5 <span>↑0.3</span></p>
-                        <p>from 287 reviews</p>
+                        <p>from {{ total_reviews }} reviews</p>
                     </div>
                     <div class="card">
                         <h3>Total Reviews</h3>
@@ -76,13 +73,14 @@
                     </div>
                 </div>
 
+                <!-- Charts -->
                 <div class="charts">
                     <div class="chart-area" id="chart0"></div>
                     <div class="chart-donut" id="chart1"></div>
                 </div>
 
+                <!-- Tables -->
                 <div class="tables">
-                    <!-- Top Issues -->
                     <div class="top-issues">
                         <div class="top-issues-header">
                             <h3>Top Issues</h3>
@@ -113,41 +111,28 @@
                     </div>
 
                     <div class="recent-reviews">
-                        <div class="recent-reviews-header">
-                            <h3>Recent Reviews</h3>
-                            <button class="view-all">
-                                View All <span class="material-symbols-outlined">chevron_right</span>
-                            </button>
-                        </div>
+    <div class="recent-reviews-header">
+        <h3>Recent Reviews</h3>
+        <button class="view-all">
+            View All <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>User</th>
+                <th>Rating</th>
+                <th>Review</th>
+                <th>Sentiment</th>
+            </tr>
+        </thead>
+        <tbody id="recent-reviews-body">
+            <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
 
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>User</th>
-                                    <th>Rating</th>
-                                    <th>Review</th>
-                                    <th>Sentiment</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Sep 12, 2023</td>
-                                    <td>John D.</td>
-                                    <td>⭐⭐⭐⭐☆</td>
-                                    <td>Great phone overall, but the battery life could be better. I find myself charging it twice a day with heavy use.</td>
-                                    <td class="neutral">Neutral</td>
-                                </tr>
-                                <tr>
-                                    <td>Sep 10, 2023</td>
-                                    <td>Sarah M.</td>
-                                    <td>⭐⭐⭐⭐⭐</td>
-                                    <td>Absolutely love this phone! The camera is incredible and the performance is lightning fast.</td>
-                                    <td class="positive">Positive</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </main>
         </div>
@@ -159,115 +144,64 @@
     <div class="modal-content">
         <h3>Add Product</h3>
         <form id="productForm">
-            <input type="text" id="pid" name="pid" placeholder="Enter Product PID" required>
-            <input type="text" id="name" name="name" placeholder="Enter Product Name" required>
+            <input type="text" id="pid" placeholder="Enter Product PID" required>
+            <input type="text" id="name" placeholder="Enter Product Name" required>
             <div class="modal-actions">
                 <button type="submit">Add</button>
-                <button type="button" class="close" id="closeModal">Cancel</button>
+                <button type="button" id="closeModal">Cancel</button>
             </div>
         </form>
+        <div id="form-error" style="display:none; color:red; text-align:center; margin-top:0.5rem;">
+            Please fill both fields
+        </div>
     </div>
 </div>
 
 <style>
-.add-product-btn {
-    display: block;
-    margin-top: .5rem;
-    width: 100%;
-    padding: .5rem;
-    border: 1px dashed #aaa;
-    background: transparent;
-    border-radius: 8px;
-    cursor: pointer;
-}
-.add-product-btn:hover { background: #f3f4f6; }
-
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-.modal-content {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
-}
-.modal-content input {
-    width: 100%;
-    margin-bottom: 0.75rem;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-}
-.modal-actions {
-    display: flex;
-    gap: .5rem;
-    justify-content: center;
-}
-.modal-content button {
-    padding: .4rem 1rem;
-    border-radius: 6px;
-    border: none;
-}
-.modal-content button[type=submit] { background: #4f46e5; color: white; }
-.modal-content button.close { background: #e5e7eb; }
+/* Modal + Add Product Styles */
+.add-product-btn { display:block; margin-top:.5rem; width:100%; padding:.5rem; border:1px dashed #aaa; cursor:pointer; }
+.modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); justify-content:center; align-items:center; z-index:1000; }
+.modal-content { background:white; padding:1.5rem; border-radius:10px; width:90%; max-width:400px; }
+.modal-content input { width:100%; margin-bottom:.75rem; padding:.5rem; border-radius:6px; border:1px solid #ccc; }
+.modal-actions { display:flex; justify-content:space-between; gap:.5rem; }
+.modal-content button[type=submit] { background:#4f46e5; color:white; padding:.4rem 1rem; border-radius:6px; border:none; }
+.modal-content button#closeModal { background:#e5e7eb; padding:.4rem 1rem; border-radius:6px; border:none; }
 </style>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    const addBox = document.getElementById("add-product-box");
-    const form = document.getElementById("add-product-form");
-    const saveBtn = document.getElementById("save-product");
-    const cancelBtn = document.getElementById("cancel-product");
+    const modal = document.getElementById("productModal");
+    const openModalBtn = document.getElementById("openProductModal");
+    const closeModalBtn = document.getElementById("closeModal");
+    const productForm = document.getElementById("productForm");
     const errorBox = document.getElementById("form-error");
 
-    addBox.addEventListener("click", () => form.style.display = "block");
-    cancelBtn.addEventListener("click", () => form.style.display = "none");
+    openModalBtn.onclick = () => { modal.style.display="flex"; errorBox.style.display="none"; };
+    closeModalBtn.onclick = () => modal.style.display="none";
+    window.onclick = e => { if(e.target===modal) modal.style.display="none"; };
 
-    saveBtn.addEventListener("click", async () => {
-        const pid = document.getElementById("product-url").value.trim();
-        const name = document.getElementById("product-name").value.trim();
-
-        if (!pid || !name) {
-            errorBox.style.display = "block";
-            return;
-        }
-
-        errorBox.style.display = "none";
+    productForm.onsubmit = async e => {
+        e.preventDefault();
+        const pid = document.getElementById("pid").value.trim();
+        const name = document.getElementById("name").value.trim();
+        if(!pid||!name){ errorBox.style.display="block"; return; }
+        errorBox.style.display="none";
 
         try {
             const res = await fetch("/api/add-product/", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ pid, name })
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({pid,name})
             });
-
             const data = await res.json();
-
-            if (!res.ok) {
-                alert(`❌ ${data.error}`);
-                return;
-            }
-
-            alert(`✅ ${data.message}`);
-            form.style.display = "none";
-            document.getElementById("product-url").value = "";
-            document.getElementById("product-name").value = "";
-        } catch (err) {
-            console.error("Error adding product:", err);
-            alert("⚠️ Something went wrong");
-        }
-    });
+            if(!res.ok) return alert(`❌ ${data.error}`);
+            alert(`✅ ${data.message} | Reviews Scraped: ${data.reviews_scraped}`);
+            modal.style.display="none";
+            productForm.reset();
+        } catch(err){ console.error(err); alert("⚠️ Something went wrong"); }
+    };
 });
 </script>
-
 
 <script src="{% static 'js/dashboard.js' %}"></script>
 </body>

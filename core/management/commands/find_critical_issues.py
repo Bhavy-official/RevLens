@@ -5,7 +5,7 @@ import re
 from collections import defaultdict, Counter
 
 class Command(BaseCommand):
-    help = "ML-based Critical Issues Analyzer for product reviews"
+    help = "ML-based Critical Issues Analyzer for product reviews (with detailed summary)"
 
     def __init__(self):
         super().__init__()
@@ -21,27 +21,51 @@ class Command(BaseCommand):
         ]
         self.max_issues_per_review = 5
 
+    # -----------------------------
+    # Load classifier
+    # -----------------------------
     def load_classifier(self):
         self.stdout.write("🔄 Loading zero-shot classifier...")
         try:
             self.classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
-            self.stdout.write("✅ Classifier loaded")
+            self.stdout.write("✅ Classifier loaded successfully")
             return True
         except Exception as e:
-            self.stdout.write(f"❌ Failed to load classifier: {e}")
+            self.stdout.write(self.style.ERROR(f"❌ Failed to load classifier: {e}"))
             return False
 
+    # -----------------------------
+    # Helpers
+    # -----------------------------
     def get_language_intensity(self, text):
         strong_words = ["terrible", "worst", "horrible", "disgusting", "hate", "awful", "painful"]
         count = sum(text.lower().count(word) for word in strong_words)
-        return 1 + min(count * 0.3, 1)
+        return 1 + min(count * 0.3, 1)  # scales 1.0 - 2.0
 
-    def extract_evidence_sentences(self, text, issue_label):
+    def extract_evidence_sentences(self, text, issue_label, max_samples=2):
         sentences = re.split(r'[.!?]+', text)
-        keywords = issue_label.split()
-        evidence = [s.strip() for s in sentences if any(word in s.lower() for word in keywords)]
-        return evidence[:2]
+        sentences = [s.strip() for s in sentences if s.strip()]
 
+        # Deduplicate and normalize
+        clean_sentences = []
+        for s in sentences:
+            s = re.sub(r"(read more|READ MORE)", "", s).strip()
+            if s and s not in clean_sentences:
+                clean_sentences.append(s)
+
+        # Match issue keywords
+        keywords = issue_label.split()
+        evidence = [s for s in clean_sentences if any(word in s.lower() for word in keywords)]
+
+        # Fallback: pick most intense sentences
+        if not evidence:
+            evidence = sorted(clean_sentences, key=lambda s: self.get_language_intensity(s), reverse=True)
+
+        return evidence[:max_samples]
+
+    # -----------------------------
+    # Main analysis
+    # -----------------------------
     def analyze_review(self, review):
         text = review.text
         if not text:
@@ -92,13 +116,23 @@ class Command(BaseCommand):
                 self.stdout.write(f"Processed {idx} reviews...")
         return all_issues
 
+    # -----------------------------
+    # Summary + Report Generation
+    # -----------------------------
     def summarize(self, all_issues):
         summary = []
         for issue_label, issue_list in all_issues.items():
             count = len(issue_list)
             avg_severity = round(sum(i["severity"] for i in issue_list) / count, 2)
             top_reviewers = Counter(i["reviewer"] for i in issue_list).most_common(3)
-            example_evidence = [i["evidence"] for i in issue_list[:2]]
+            example_evidence = []
+            for i in issue_list:
+                for e in i["evidence"]:
+                    if e not in example_evidence:
+                        example_evidence.append(e)
+                if len(example_evidence) >= 2:
+                    break
+
             summary.append({
                 "issue": issue_label,
                 "total_mentions": count,
@@ -106,38 +140,49 @@ class Command(BaseCommand):
                 "top_reviewers": top_reviewers,
                 "example_evidence": example_evidence,
             })
-        return summary
+        return sorted(summary, key=lambda x: x["total_mentions"], reverse=True)
+
+    def generate_text_summary(self, summary, total_reviews):
+        if not summary:
+            return "No critical issues detected."
+        top_issues = summary[:3]
+        parts = [f"We analyzed {total_reviews} reviews in total."]
+        parts.append(f"The most common problem was '{top_issues[0]['issue']}' ({top_issues[0]['total_mentions']} mentions).")
+        if len(top_issues) > 1:
+            parts.append("Other notable issues include " + ", ".join(
+                f"'{i['issue']}' (avg severity {i['average_severity']}/10)"
+                for i in top_issues[1:]
+            ) + ".")
+        return " ".join(parts)
 
     def display_summary(self, summary, total_reviews):
         self.stdout.write("\n" + "=" * 60)
-        self.stdout.write(self.style.SUCCESS(f"CRITICAL ISSUES SUMMARY — Analyzed {total_reviews} reviews"))
+        self.stdout.write(self.style.SUCCESS(f"TOP CRITICAL ISSUES — Analyzed {total_reviews} reviews"))
         self.stdout.write("=" * 60)
         for item in summary:
             self.stdout.write(f"\nIssue: {item['issue'].upper()}")
-            self.stdout.write(f"  Total Mentions: {item['total_mentions']}")
-            self.stdout.write(f"  Average Severity: {item['average_severity']}/10")
-            self.stdout.write(f"  Top Reviewers: {', '.join(name for name, _ in item['top_reviewers'])}")
-            self.stdout.write("  Sample Evidence:")
-            for evidence in item['example_evidence']:
-                for sentence in evidence:
-                    self.stdout.write(f"    - {sentence}")
-        self.stdout.write("=" * 60 + "\n")
+            self.stdout.write(f"  Mentions: {item['total_mentions']}")
+            self.stdout.write(f"  Avg Severity: {item['average_severity']}/10")
+            for ev in item['example_evidence']:
+                self.stdout.write(f"    - {ev}")
+        self.stdout.write("=" * 60)
+        self.stdout.write(self.generate_text_summary(summary, total_reviews))
+        self.stdout.write("\nAnalysis complete!\n")
 
+    # -----------------------------
+    # CLI Arguments
+    # -----------------------------
     def add_arguments(self, parser):
-        parser.add_argument(
-            "--min-rating", type=float, default=3.0,
-            help="Analyze reviews with rating less or equal to this value (default 3.0)"
-        )
-        parser.add_argument(
-            "--product-name", type=str, default=None,
-            help="Filter reviews by product name (optional)"
-        )
+        parser.add_argument("--min-rating", type=float, default=3.0,
+                            help="Analyze reviews with rating less or equal to this value (default 3.0)")
+        parser.add_argument("--product-name", type=str, default=None,
+                            help="Filter reviews by product name (optional)")
 
     def handle(self, *args, **options):
         if not self.load_classifier():
             return
 
-        from core.models import Product  # lazy import if needed
+        from core.models import Product
 
         # Filter reviews by product name if provided
         if options["product_name"]:
@@ -165,4 +210,12 @@ class Command(BaseCommand):
 
         summary = self.summarize(all_issues)
         self.display_summary(summary, total_reviews)
-        self.stdout.write(self.style.SUCCESS("Analysis complete!"))
+
+        summary_text = self.generate_text_summary(summary, total_reviews)
+
+# Save to a .txt file
+        filename = f"review_summary_{options['product_name'] or 'all'}.txt"
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(summary_text)
+
+        self.stdout.write(self.style.SUCCESS(f"✅ Summary saved to {filename}"))

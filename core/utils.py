@@ -1,19 +1,20 @@
+# core/utils.py
 from transformers import pipeline
 from nltk.tokenize import sent_tokenize
 import statistics
 
+classifier = pipeline(
+    "sentiment-analysis",
+    model="distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+    device=-1
+)
+
 def analyze_sentiments_for_reviews(reviews):
     """
-    Analyze sentiment for a queryset or list of Review objects.
-    Updates each Review with sentiment and sentiment_score.
-    Returns number of reviews updated.
+    Takes a queryset or list of Review objects and updates
+    their sentiment and sentiment_score fields.
+    Returns the number of reviews updated.
     """
-    classifier = pipeline(
-        "sentiment-analysis",
-        model="distilbert/distilbert-base-uncased-finetuned-sst-2-english",
-        device=-1
-    )
-
     updated_count = 0
     for review in reviews:
         if not review.text:
@@ -24,6 +25,7 @@ def analyze_sentiments_for_reviews(reviews):
             continue
 
         results = classifier(sentences, truncation=True)
+
         weighted_scores = []
         sentiments = []
 
