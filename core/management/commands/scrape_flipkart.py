@@ -29,6 +29,7 @@ class Command(BaseCommand):
                 text=r['review_text'],
                 title=r['title'],
                 location=r['location'],
-                review_date=r['date']
+                review_date=r['date'],
+                category="product",
             )
             print(f"[DEBUG] Saved review: {r['reviewer_name']} - {r['rating']}")

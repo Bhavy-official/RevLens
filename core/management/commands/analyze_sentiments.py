@@ -4,16 +4,23 @@ from transformers import pipeline
 from core.models import Review
 from nltk.tokenize import sent_tokenize
 import nltk
+import statistics
 
-nltk.download('punkt', quiet=True)
+nltk.download("punkt", quiet=True)
 
 class Command(BaseCommand):
-    help = "Analyze sentiment for all reviews with sentence-level weighting"
+    help = "Analyze sentiment for all reviews with robust sentence-level analysis"
 
     def handle(self, *args, **kwargs):
         self.stdout.write("🔍 Starting sentiment analysis...")
 
-        classifier = pipeline("sentiment-analysis", device=-1)
+        # ✅ Use a stable, recommended model (not default)
+        classifier = pipeline(
+            "sentiment-analysis",
+            model="distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+            device=-1
+        )
+
         reviews = Review.objects.all()
         updated_count = 0
 
@@ -21,27 +28,44 @@ class Command(BaseCommand):
             if not review.text:
                 continue
 
+            # Split into sentences
             sentences = sent_tokenize(review.text)
-            results = classifier(sentences)
+            if not sentences:
+                continue
 
-            # Compute weighted score: POSITIVE = score, NEGATIVE = 1 - score
+            results = classifier(sentences, truncation=True)
+
             weighted_scores = []
+            sentiments = []
+
             for r in results:
+                score = r["score"]
                 if r["label"] == "POSITIVE":
-                    weighted_scores.append(r["score"])
+                    sentiments.append(1)
+                    weighted_scores.append(score)
                 else:
-                    weighted_scores.append(1 - r["score"])
+                    sentiments.append(0)
+                    weighted_scores.append(1 - score)
 
-            # Final sentiment
-            avg_score = sum(weighted_scores) / len(weighted_scores)
-            final_sentiment = "positive" if avg_score >= 0.5 else "negative"
+            # ✅ Use median for robustness against extreme sentences
+            avg_score = statistics.mean(weighted_scores)
+            median_score = statistics.median(weighted_scores)
 
-            # Save to DB
+            # ✅ Final sentiment decision based on both average + majority vote
+            majority_vote = "positive" if sum(sentiments) >= len(sentiments) / 2 else "negative"
+            final_sentiment = "positive" if median_score >= 0.5 else majority_vote
+
             review.sentiment = final_sentiment
-            review.sentiment_score = avg_score
+            review.sentiment_score = round(avg_score, 3)
             review.save(update_fields=["sentiment", "sentiment_score"])
 
-            print(f"{review.reviewer[:20]}... | Sentiment: {final_sentiment} | Score: {avg_score:.2f}")
+            print(
+                f"📄 {review.reviewer[:20]}... | "
+                f"Sentiment: {final_sentiment.upper()} | "
+                f"Avg: {avg_score:.2f}, Median: {median_score:.2f}"
+            )
             updated_count += 1
 
-        self.stdout.write(self.style.SUCCESS(f"✅ Sentiment analysis completed for {updated_count} reviews."))
+        self.stdout.write(
+            self.style.SUCCESS(f"✅ Sentiment analysis completed for {updated_count} reviews.")
+        )

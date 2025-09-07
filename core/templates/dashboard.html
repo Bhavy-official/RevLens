@@ -1,0 +1,274 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RevLens Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css'%}" />
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+</head>
+<body>
+<div id="revlens">
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>RevLens</h1>
+            </div>
+            <div class="sidebar-section">
+                <h2>Products</h2>
+                <button class="product-btn active">SmartPhone Pro <span>32</span></button>
+                <button class="product-btn">AudioBuds X <span>16</span></button>
+                <button class="product-btn">SmartWatch <span>8</span></button>
+
+                <!-- Add Product Trigger -->
+                <button class="add-product-btn" id="openProductModal">
+                    ➕ Add Product
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <h2>Date Range</h2>
+                <button class="date-range-btn">Last 30 days</button>
+            </div>
+            <div class="sidebar-footer">
+                <button>Settings</button>
+                <button>Help Center</button>
+            </div>
+        </aside>
+
+        <!-- Main content -->
+        <div class="main">
+            <header>
+                <div class="search-box">
+                    <input type="text" placeholder="Search reviews, issues...">
+                </div>
+                <div class="header-right">
+                    <p>Welcome back, <strong>Alex</strong></p>
+                    <button>Connect</button>
+                    <button id="theme-toggle">Toggle Theme</button>
+                </div>
+            </header>
+
+            <main>
+                <div class="dashboard-header">
+                    <h1>Dashboard</h1>
+                    <p>Analytics for SmartPhone Pro</p>
+                </div>
+
+                <div class="stats-cards">
+                    <div class="card">
+                        <h3>Sentiment Change</h3>
+                        <p class="big-text">+12.4% <span>↑2.3%</span></p>
+                        <p>vs previous period</p>
+                    </div>
+                    <div class="card">
+                        <h3>Average Rating</h3>
+                        <p class="big-text">4.2 / 5 <span>↑0.3</span></p>
+                        <p>from 287 reviews</p>
+                    </div>
+                    <div class="card">
+                        <h3>Total Reviews</h3>
+                        <p class="big-text">287 <span>↑24</span></p>
+                        <p>last 30 days</p>
+                    </div>
+                </div>
+
+                <div class="charts">
+                    <div class="chart-area" id="chart0"></div>
+                    <div class="chart-donut" id="chart1"></div>
+                </div>
+
+                <div class="tables">
+                    <!-- Top Issues -->
+                    <div class="top-issues">
+                        <div class="top-issues-header">
+                            <h3>Top Issues</h3>
+                            <span class="timeframe">Last 30 days</span>
+                        </div>
+                        <ul>
+                            <li>
+                                <div class="issue-title">Battery life issues</div>
+                                <div class="issue-severity">High</div>
+                                <div class="issue-details">Mentioned in 42 reviews (14.6%)</div>
+                            </li>
+                            <li>
+                                <div class="issue-title">Camera quality</div>
+                                <div class="issue-severity">Medium</div>
+                                <div class="issue-details">Mentioned in 28 reviews (9.8%)</div>
+                            </li>
+                            <li>
+                                <div class="issue-title">Screen responsiveness</div>
+                                <div class="issue-severity">Medium</div>
+                                <div class="issue-details">Mentioned in 23 reviews (8.0%)</div>
+                            </li>
+                            <li>
+                                <div class="issue-title">Software bugs</div>
+                                <div class="issue-severity">Low</div>
+                                <div class="issue-details">Mentioned in 18 reviews (6.3%)</div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="recent-reviews">
+                        <div class="recent-reviews-header">
+                            <h3>Recent Reviews</h3>
+                            <button class="view-all">
+                                View All <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>User</th>
+                                    <th>Rating</th>
+                                    <th>Review</th>
+                                    <th>Sentiment</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Sep 12, 2023</td>
+                                    <td>John D.</td>
+                                    <td>⭐⭐⭐⭐☆</td>
+                                    <td>Great phone overall, but the battery life could be better. I find myself charging it twice a day with heavy use.</td>
+                                    <td class="neutral">Neutral</td>
+                                </tr>
+                                <tr>
+                                    <td>Sep 10, 2023</td>
+                                    <td>Sarah M.</td>
+                                    <td>⭐⭐⭐⭐⭐</td>
+                                    <td>Absolutely love this phone! The camera is incredible and the performance is lightning fast.</td>
+                                    <td class="positive">Positive</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div id="productModal" class="modal">
+    <div class="modal-content">
+        <h3>Add Product</h3>
+        <form id="productForm">
+            <input type="text" id="pid" name="pid" placeholder="Enter Product PID" required>
+            <input type="text" id="name" name="name" placeholder="Enter Product Name" required>
+            <div class="modal-actions">
+                <button type="submit">Add</button>
+                <button type="button" class="close" id="closeModal">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.add-product-btn {
+    display: block;
+    margin-top: .5rem;
+    width: 100%;
+    padding: .5rem;
+    border: 1px dashed #aaa;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.add-product-btn:hover { background: #f3f4f6; }
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.modal-content {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+}
+.modal-content input {
+    width: 100%;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+.modal-actions {
+    display: flex;
+    gap: .5rem;
+    justify-content: center;
+}
+.modal-content button {
+    padding: .4rem 1rem;
+    border-radius: 6px;
+    border: none;
+}
+.modal-content button[type=submit] { background: #4f46e5; color: white; }
+.modal-content button.close { background: #e5e7eb; }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const addBox = document.getElementById("add-product-box");
+    const form = document.getElementById("add-product-form");
+    const saveBtn = document.getElementById("save-product");
+    const cancelBtn = document.getElementById("cancel-product");
+    const errorBox = document.getElementById("form-error");
+
+    addBox.addEventListener("click", () => form.style.display = "block");
+    cancelBtn.addEventListener("click", () => form.style.display = "none");
+
+    saveBtn.addEventListener("click", async () => {
+        const pid = document.getElementById("product-url").value.trim();
+        const name = document.getElementById("product-name").value.trim();
+
+        if (!pid || !name) {
+            errorBox.style.display = "block";
+            return;
+        }
+
+        errorBox.style.display = "none";
+
+        try {
+            const res = await fetch("/api/add-product/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pid, name })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(`❌ ${data.error}`);
+                return;
+            }
+
+            alert(`✅ ${data.message}`);
+            form.style.display = "none";
+            document.getElementById("product-url").value = "";
+            document.getElementById("product-name").value = "";
+        } catch (err) {
+            console.error("Error adding product:", err);
+            alert("⚠️ Something went wrong");
+        }
+    });
+});
+</script>
+
+
+<script src="{% static 'js/dashboard.js' %}"></script>
+</body>
+</html>

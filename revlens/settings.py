@@ -30,6 +30,8 @@ ALLOWED_HOSTS = []
 
 # Application definition
 STATIC_URL = "/static/"
+STATICFILES_DIRS = [ BASE_DIR / "core" / "static" ]
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 INSTALLED_APPS = [

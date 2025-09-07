@@ -1,0 +1,276 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RevLens – Review Analytics</title>
+    <link rel="stylesheet" href="{% static 'css/home2.css'%}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="bg-grad"></div>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="#">
+                <span class="brand-mark" aria-hidden>✦</span>
+                <span class="brand-text">RevLens</span>
+            </a>
+            <nav class="nav">
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#about">About</a>
+                <a href="#blog">Blog</a>
+                <a href="#contact">Contact</a>
+            </nav>
+            <div class="header-cta">
+                <a class="btn btn-ghost" href="#demo">See Demo</a>
+                <a class="btn btn-primary" href="#signup">Get Started</a>
+                <button class="theme-toggle" aria-label="Toggle theme"></button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero -->
+        <section class="section hero" id="home">
+            <div class="container hero-grid">
+                <div class="hero-copy">
+                    <span class="pill"><span class="dot"></span> Live review analytics</span>
+                    <h1>Turn Customer Reviews into Actionable Insights ✨</h1>
+                    <p>Monitor, analyze, and act on product feedback in real time with RevLens.</p>
+                    <div class="cta-row">
+                        <a class="btn btn-primary" href="#signup">Get Started – Free Trial</a>
+                        <a class="btn btn-ghost" href="#demo">See Dashboard Demo</a>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="dash">
+                        <div class="dash-grid">
+                            <div class="stat"><span class="stat-label">Avg. Sentiment</span><span
+                                    class="stat-value">78%</span><span class="stat-trend up">↑ 4.2%</span></div>
+                            <div class="stat"><span class="stat-label">New Reviews</span><span
+                                    class="stat-value">1,248</span><span class="stat-trend up">↑ 2.1%</span></div>
+                            <div class="stat"><span class="stat-label">Top Issues</span><span
+                                    class="stat-value">3</span><span class="stat-trend">↓ 0.8%</span></div>
+                            <div class="stat"><span class="stat-label">Response Rate</span><span
+                                    class="stat-value">96%</span><span class="stat-trend up">↑ 1.4%</span></div>
+                        </div>
+                        <div class="cards">
+                            <div class="card">
+                                <div class="card-title">Sentiment Over Time</div>
+                                <svg viewBox="0 0 240 110" class="line-chart" aria-hidden>
+                                    <polyline fill="none" stroke="#7c3aed" stroke-width="3"
+                                        points="10,80 50,60 90,70 130,55 170,65 210,58" />
+                                    <polyline fill="none" stroke="#06b6d4" stroke-width="3"
+                                        points="10,70 50,75 90,55 130,70 170,60 210,75" />
+                                    <g stroke="currentColor" stroke-width="1" opacity=".15">
+                                        <line x1="10" y1="90" x2="230" y2="90" />
+                                        <line x1="10" y1="70" x2="230" y2="70" />
+                                        <line x1="10" y1="50" x2="230" y2="50" />
+                                    </g>
+                                </svg>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">Issue Frequency</div>
+                                <svg viewBox="0 0 240 110" class="bar-chart" aria-hidden>
+                                    <g fill="#7c3aed">
+                                        <rect x="20" y="40" width="18" height="50" rx="4" />
+                                        <rect x="55" y="48" width="18" height="42" rx="4" />
+                                        <rect x="90" y="30" width="18" height="60" rx="4" />
+                                        <rect x="125" y="55" width="18" height="35" rx="4" />
+                                        <rect x="160" y="35" width="18" height="55" rx="4" />
+                                        <rect x="195" y="25" width="18" height="65" rx="4" />
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="issues">
+                            <div class="issue"><span>Battery Drain</span><span class="tag danger">High</span></div>
+                            <div class="issue"><span>Login Failures</span><span class="tag warn">Medium</span></div>
+                            <div class="issue"><span>Shipping Delay</span><span class="tag good">Low</span></div>
+                            <div class="issue"><span>Broken UI on iOS</span><span class="tag warn">Medium</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="section" id="features">
+            <div class="container text-center">
+                <h2>Key Features</h2>
+                <p class="muted">Everything you need to go from noise to insight.</p>
+            </div>
+            <div class="container grid-4 features">
+                <article class="feature-card">
+                    <h3>Sentiment Analysis 💖</h3>
+                    <p>Understand how customers feel across channels.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Top Issues Extraction 🛠</h3>
+                    <p>Automatically surface recurring problems.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Real-Time Monitoring ⏱</h3>
+                    <p>Get alerts as reviews roll in.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Summary Insights 📊</h3>
+                    <p>Clear takeaways for your team.</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="section hiw" id="how">
+            <div class="container text-center">
+                <h2>How It Works</h2>
+                <p class="muted">From raw feedback to actionable dashboards.</p>
+            </div>
+            <div class="container steps">
+                <div class="step">
+                    <div class="icon">📝</div>
+                    <div class="label">Raw Reviews</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="step">
+                    <div class="icon">🔗</div>
+                    <div class="label">Scraper/API</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="step">
+                    <div class="icon">🧹</div>
+                    <div class="label">Cleaning</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="step">
+                    <div class="icon">🤖</div>
+                    <div class="label">NLP Sentiment & Issue Extraction</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="step">
+                    <div class="icon">📊</div>
+                    <div class="label">Dashboard Insights</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Preview -->
+        <section class="section" id="demo">
+            <div class="container text-center">
+                <h2>Dashboard Preview</h2>
+                <p class="muted">Explore stats, trends, top issues, and the latest reviews.</p>
+            </div>
+            <div class="container">
+                <div class="dash shadow-lg">
+                    <div class="dash-grid">
+                        <div class="stat"><span class="stat-label">Avg. Sentiment</span><span
+                                class="stat-value">78%</span><span class="stat-trend up">↑ 4.2%</span></div>
+                        <div class="stat"><span class="stat-label">New Reviews</span><span
+                                class="stat-value">1,248</span><span class="stat-trend up">↑ 2.1%</span></div>
+                        <div class="stat"><span class="stat-label">Top Issues</span><span
+                                class="stat-value">3</span><span class="stat-trend">↓ 0.8%</span></div>
+                        <div class="stat"><span class="stat-label">Response Rate</span><span
+                                class="stat-value">96%</span><span class="stat-trend up">↑ 1.4%</span></div>
+                    </div>
+                    <div class="cards">
+                        <div class="card">
+                            <div class="card-title">Sentiment Over Time</div>
+                            <svg viewBox="0 0 240 110" class="line-chart" aria-hidden>
+                                <polyline fill="none" stroke="#7c3aed" stroke-width="3"
+                                    points="10,80 50,60 90,70 130,55 170,65 210,58" />
+                                <polyline fill="none" stroke="#06b6d4" stroke-width="3"
+                                    points="10,70 50,75 90,55 130,70 170,60 210,75" />
+                            </svg>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Issue Frequency</div>
+                            <svg viewBox="0 0 240 110" class="bar-chart" aria-hidden>
+                                <g fill="#7c3aed">
+                                    <rect x="20" y="40" width="18" height="50" rx="4" />
+                                    <rect x="55" y="48" width="18" height="42" rx="4" />
+                                    <rect x="90" y="30" width="18" height="60" rx="4" />
+                                    <rect x="125" y="55" width="18" height="35" rx="4" />
+                                    <rect x="160" y="35" width="18" height="55" rx="4" />
+                                    <rect x="195" y="25" width="18" height="65" rx="4" />
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="center mt-24">
+                    <a class="btn btn-primary" href="#demo">Try the Dashboard Now</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section class="section testimonials">
+            <div class="container text-center">
+                <h2>What users say</h2>
+            </div>
+            <div class="container">
+                <div class="carousel" id="carousel">
+                    <article class="tcard">
+                        <p class="lg">Love the simplicity. Our team finally understands review trends! 😍</p>
+                        <p class="meta">Maya S. — PM @ Acme</p>
+                    </article>
+                    <article class="tcard">
+                        <p class="lg">RevLens surfaces top issues in minutes. Absolute game changer.</p>
+                        <p class="meta">Diego R. — CX Lead @ Shoply</p>
+                    </article>
+                    <article class="tcard">
+                        <p class="lg">The dashboard is beautiful and actually useful. 10/10.</p>
+                        <p class="meta">Jin Park — Founder @ AppKit</p>
+                    </article>
+                    <article class="tcard">
+                        <p class="lg">Real-time alerts helped us catch a bad release quickly. 🙌</p>
+                        <p class="meta">Alicia V. — Growth @ North</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div>
+                <div class="brand brand-footer"><span class="brand-mark">✦</span><span class="brand-text">RevLens</span>
+                </div>
+                <p class="muted">Made with ❤ by RevLens. Turn customer reviews into actionable insights.</p>
+                <div class="socials">
+                    <a class="social" href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noreferrer">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                            <path
+                                d="M22 5.8c-.7.3-1.4.5-2.2.6.8-.5 1.3-1.2 1.6-2.1-.7.4-1.5.7-2.3.9A3.7 3.7 0 0 0 12 7.5c0 .3 0 .6.1.9-3.1-.1-5.9-1.6-7.8-4a3.8 3.8 0 0 0 .5 4.9c-.6 0-1.2-.2-1.7-.5 0 1.9 1.4 3.6 3.2 4-.6.2-1.2.2-1.8.1.5 1.7 2.2 2.9 4.1 3a7.5 7.5 0 0 1-5.6 1.6A10.5 10.5 0 0 0 9 20c6.8 0 10.5-5.8 10.5-10.8v-.5c.7-.6 1.3-1.2 1.8-2z" />
+                        </svg>
+                    </a>
+                    <a class="social" href="https://www.linkedin.com" aria-label="LinkedIn" target="_blank"
+                        rel="noreferrer">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                            <path
+                                d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 22h4V7h-4v15zM8 7h3.8v2.1h.1C12.7 7.9 14 7 16 7c3.6 0 4.3 2.1 4.3 4.9V22h-4v-7.2c0-1.7 0-3.9-2.4-3.9s-2.8 1.9-2.8 3.8V22H8V7z" />
+                        </svg>
+                    </a>
+                    <a class="social" href="https://github.com" aria-label="GitHub" target="_blank" rel="noreferrer">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                            <path
+                                d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.3-1.8-1.3-1.8-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 .1.6 1.8 2.6 1.3.1-.8.4-1.4.7-1.7-2.7-.3-5.6-1.4-5.6-6.1 0-1.3.5-2.5 1.2-3.3-.1-.3-.5-1.7.1-3.6 0 0 1-.3 3.4 1.2a11.6 11.6 0 0 1 6.2 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.9.2 3.3.1 3.6.8.8 1.2 2 1.2 3.3 0 4.7-2.9 5.8-5.7 6.1.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.9.6A12 12 0 0 0 12 .5z" />
+                        </svg>
+                    </a>
+                    <button class="theme-toggle small" aria-label="Toggle theme"></button>
+                </div>
+            </div>
+            <div class="copyright">© <span id="year"></span> RevLens. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/home2.js'%}"></script>
+</body>
+
+</html>
